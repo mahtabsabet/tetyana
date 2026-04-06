@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Les Aventures de Madame Tetyana</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background-color: #1a1a2e;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+      }
+
+      #game-container {
+        position: relative;
+      }
+
+      /* Portrait-mode overlay */
+      #rotate-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: #1a1a2e;
+        color: white;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 1.4rem;
+        z-index: 1000;
+        padding: 2rem;
+      }
+
+      #rotate-overlay .rotate-icon {
+        font-size: 5rem;
+        animation: tilt 2s ease-in-out infinite;
+        display: block;
+        margin-bottom: 1rem;
+      }
+
+      @keyframes tilt {
+        0%   { transform: rotate(0deg); }
+        40%  { transform: rotate(90deg); }
+        60%  { transform: rotate(90deg); }
+        100% { transform: rotate(0deg); }
+      }
+
+      @media (max-width: 600px) and (orientation: portrait) {
+        #rotate-overlay { display: flex; }
+      }
+
+      /* Virtual controls — shown only on touch devices via JS */
+      #virtual-controls {
+        display: none;
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      #virtual-controls.active { display: block; }
+
+      .vctrl-btn {
+        position: absolute;
+        pointer-events: all;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.15);
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+        width: 70px;
+        height: 70px;
+      }
+
+      #vctrl-left   { bottom: 110px; left: 30px; }
+      #vctrl-right  { bottom: 110px; left: 120px; }
+      #vctrl-jump   { bottom: 170px; right: 30px; background: rgba(255,200,0,0.25); border-color: rgba(255,200,0,0.7); }
+      #vctrl-action { bottom: 90px;  right: 30px; background: rgba(0,200,255,0.2); border-color: rgba(0,200,255,0.6); }
+    </style>
+  </head>
+  <body>
+    <div id="rotate-overlay">
+      <span class="rotate-icon">📱</span>
+      <p>Retourne ton téléphone pour jouer !</p>
+    </div>
+
+    <div id="game-container"></div>
+
+    <div id="virtual-controls">
+      <div class="vctrl-btn" id="vctrl-left">◀</div>
+      <div class="vctrl-btn" id="vctrl-right">▶</div>
+      <div class="vctrl-btn" id="vctrl-jump">▲</div>
+      <div class="vctrl-btn" id="vctrl-action">★</div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
