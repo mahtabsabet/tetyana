@@ -13,6 +13,25 @@ import { Player }              from '../../core/player/Player.js';
 import { InputManager }        from '../../core/input/InputManager.js';
 import { initVirtualControls,
          hideVirtualControls } from '../../core/input/VirtualControls.js';
+import { showQuiz }            from '../../core/scenes/QuizOverlay.js';
+
+// ── Questions vocabulaire (2 par niveau) ─────────────────────────────────────
+// TODO: Remplacez imageEmoji par imageKey quand les vraies images sont prêtes.
+//   Chargez-les dans preload() : this.load.image('foret_quiz_recyclage', ...)
+const QUIZ_QUESTIONS = [
+  {
+    imageEmoji: '♻️',
+    // imageKey: 'foret_quiz_recyclage',
+    correct: 'Le recyclage',
+    wrong:   ['La pollution', 'La forêt', 'Le soleil'],
+  },
+  {
+    imageEmoji: '🏭',
+    // imageKey: 'foret_quiz_usine',
+    correct: 'La pollution',
+    wrong:   ['Le recyclage', 'La neige', 'La pluie'],
+  },
+];
 
 // ── TODO: Personnalisez ces valeurs pour votre niveau ────────────────────────
 
@@ -249,9 +268,13 @@ export class ForetScene extends Phaser.Scene {
 
     if (this.cache.audio.exists('snd_success')) this.sound.play('snd_success');
 
-    this.time.delayedCall(2500, () => {
-      this._ctx?.onComplete({ levelId: 'level01-foret', completed: true, pointsEarned: this._score, starsEarned: etoiles, durationSeconds: TIME_LIMIT - this._timeLeft });
-      this._terminer();
+    // Show vocabulary quiz before completing the level
+    this.time.delayedCall(1500, () => {
+      showQuiz(this, QUIZ_QUESTIONS, (bonus) => {
+        this._score += bonus;
+        this._ctx?.onComplete({ levelId: 'level01-foret', completed: true, pointsEarned: this._score, starsEarned: etoiles, durationSeconds: TIME_LIMIT - this._timeLeft });
+        this._terminer();
+      });
     });
   }
 

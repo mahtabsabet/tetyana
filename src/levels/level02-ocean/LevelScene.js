@@ -13,6 +13,25 @@ import { Player }              from '../../core/player/Player.js';
 import { InputManager }        from '../../core/input/InputManager.js';
 import { initVirtualControls,
          hideVirtualControls } from '../../core/input/VirtualControls.js';
+import { showQuiz }            from '../../core/scenes/QuizOverlay.js';
+
+// ── Questions vocabulaire (2 par niveau) ─────────────────────────────────────
+// TODO: Remplacez imageEmoji par imageKey quand les vraies images sont prêtes.
+const QUIZ_QUESTIONS = [
+  {
+    imageEmoji: '🚣',
+    // imageKey: 'ocean_quiz_kayak',
+    question:  "Qu'est-ce qu'elle fait ?",
+    correct:   "J'aime faire du kayak",
+    wrong:     ["J'aime nager", "J'aime danser", "J'aime voler"],
+  },
+  {
+    imageEmoji: '🐬',
+    // imageKey: 'ocean_quiz_dauphin',
+    correct: 'Le dauphin',
+    wrong:   ['Le requin', 'La baleine', 'Le poisson'],
+  },
+];
 
 const BG_COLOR         = 0x0a2a4a;
 const GROUND_COLOR     = 0x1a5c3a;
@@ -200,9 +219,13 @@ export class OceanScene extends Phaser.Scene {
     this.add.text(W/2, H/2-60, '🎉 Bravo !', { fontFamily:'Arial', fontSize:'48px', fontStyle:'bold', color:'#ffdd44', stroke:'#000', strokeThickness:6 }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
     this.add.text(W/2, H/2, '⭐'.repeat(e)+'☆'.repeat(3-e), { fontSize:'40px' }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
     if (this.cache.audio.exists('snd_success')) this.sound.play('snd_success');
-    this.time.delayedCall(2500, () => {
-      this._ctx?.onComplete({ levelId:'level02-ocean', completed:true, pointsEarned:this._score, starsEarned:e, durationSeconds:TIME_LIMIT-this._timeLeft });
-      this._terminer();
+    // Show vocabulary quiz before completing the level
+    this.time.delayedCall(1500, () => {
+      showQuiz(this, QUIZ_QUESTIONS, (bonus) => {
+        this._score += bonus;
+        this._ctx?.onComplete({ levelId:'level02-ocean', completed:true, pointsEarned:this._score, starsEarned:e, durationSeconds:TIME_LIMIT-this._timeLeft });
+        this._terminer();
+      });
     });
   }
 

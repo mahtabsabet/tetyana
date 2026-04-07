@@ -11,6 +11,21 @@ import { Player }              from '../../core/player/Player.js';
 import { InputManager }        from '../../core/input/InputManager.js';
 import { initVirtualControls,
          hideVirtualControls } from '../../core/input/VirtualControls.js';
+import { showQuiz }            from '../../core/scenes/QuizOverlay.js';
+
+// ── Questions vocabulaire — PLACEHOLDERS (groupe 5 : remplacez par vos vraies questions !) ──
+const QUIZ_QUESTIONS = [
+  {
+    imageEmoji: '🌋',
+    correct: 'Le volcan',
+    wrong:   ['La montagne', 'Le feu', 'La fumée'],
+  },
+  {
+    imageEmoji: '🔥',
+    correct: 'Le feu',
+    wrong:   ["L'eau", 'La glace', 'La fumée'],
+  },
+];
 
 const BG_COLOR         = 0x2a0a00;
 const GROUND_COLOR     = 0x555555;
@@ -139,9 +154,13 @@ export class VolcanScene extends Phaser.Scene {
     const W = this.scale.width; const H = this.scale.height;
     this.add.text(W/2, H/2-60, '🎉 Bravo !', { fontFamily:'Arial', fontSize:'48px', fontStyle:'bold', color:'#ffdd44', stroke:'#000', strokeThickness:6 }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
     this.add.text(W/2, H/2, '⭐⭐⭐', { fontSize:'40px' }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
-    this.time.delayedCall(2500, () => {
-      this._ctx?.onComplete({ levelId:'level05-volcan', completed:true, pointsEarned:this._score, starsEarned:3, durationSeconds:0 });
-      this._terminer();
+    // Show vocabulary quiz before completing the level
+    this.time.delayedCall(1500, () => {
+      showQuiz(this, QUIZ_QUESTIONS, (bonus) => {
+        this._score += bonus;
+        this._ctx?.onComplete({ levelId:'level05-volcan', completed:true, pointsEarned:this._score, starsEarned:3, durationSeconds:0 });
+        this._terminer();
+      });
     });
   }
 
