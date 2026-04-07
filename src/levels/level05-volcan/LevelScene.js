@@ -26,11 +26,12 @@ export class VolcanScene extends Phaser.Scene {
   }
 
   init(data) {
-    this._ctx      = VolcanScene._context || data?.context;
-    this._store    = this._ctx?.store;
-    this._score    = 0;
-    this._timeLeft = TIME_LIMIT;
-    this._done     = false;
+    this._ctx            = VolcanScene._context || data?.context;
+    this._store          = this._ctx?.store;
+    this._score          = 0;
+    this._timeLeft       = TIME_LIMIT;
+    this._done           = false;
+    this._damageCooldown = false;
   }
 
   preload() {
@@ -75,8 +76,21 @@ export class VolcanScene extends Phaser.Scene {
     this.physics.add.collider(this._player.sprite, platforms);
     this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
 
+    // ── Obstacles (lave — réduit les points de vie au contact) ────────────────
+    // TODO: Remplacez les emplacements et l'emoji par ceux de votre niveau
+    this._obstacles = this.physics.add.staticGroup();
+    this._obstacle(this._obstacles, 400,  H - 60, '🔥');
+    this._obstacle(this._obstacles, 900,  H - 60, '🔥');
+    this._obstacle(this._obstacles, 1400, H - 60, '🔥');
+
     this.physics.add.overlap(this._player.sprite, this._coins, (_, c) => this._ramasserCoin(c));
     this.physics.add.overlap(this._player.sprite, this._goal,  () => { if (!this._done) this._gagner(); });
+    this.physics.add.overlap(this._player.sprite, this._obstacles, () => {
+      if (this._done || this._damageCooldown) return;
+      this._damageCooldown = true;
+      this.time.delayedCall(1000, () => { this._damageCooldown = false; });
+      if (this._player.takeDamage()) { this._done = true; this.time.delayedCall(500, () => this._perdre()); }
+    });
 
     this._scoreText = this.add.text(16, 16, '⭐ 0', {
       fontFamily: 'Arial', fontSize: '22px', fontStyle: 'bold',
@@ -103,6 +117,14 @@ export class VolcanScene extends Phaser.Scene {
     }
     this._scoreText.setText();
     this._viesText.setText('❤️'.repeat(this._player.lives) + '🖤'.repeat(Math.max(0, 3 - this._player.lives)));
+  }
+
+  _obstacle(group, x, y, emoji) {
+    const rect = this.add.rectangle(x, y, 32, 36, 0xff2200);
+    this.physics.add.existing(rect, true);
+    group.add(rect);
+    this.add.text(x, y + 2, emoji, { fontSize: '26px' }).setOrigin(0.5);
+    return rect;
   }
 
   _ramasserCoin(c) {

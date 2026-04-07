@@ -32,11 +32,12 @@ export class ForetScene extends Phaser.Scene {
   }
 
   init(data) {
-    this._ctx      = ForetScene._context || data?.context;
-    this._store    = this._ctx?.store;
-    this._score    = 0;
-    this._timeLeft = TIME_LIMIT;
-    this._done     = false;
+    this._ctx            = ForetScene._context || data?.context;
+    this._store          = this._ctx?.store;
+    this._score          = 0;
+    this._timeLeft       = TIME_LIMIT;
+    this._done           = false;
+    this._damageCooldown = false;
   }
 
   preload() {
@@ -106,9 +107,22 @@ export class ForetScene extends Phaser.Scene {
     this.physics.add.collider(this._player.sprite, platforms);
     this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
 
+    // ── Obstacles (réduisent les points de vie au contact) ────────────────────
+    // TODO: Remplacez les emplacements et l'emoji par ceux de votre niveau
+    this._obstacles = this.physics.add.staticGroup();
+    this._obstacle(this._obstacles, 430,  H - 60, '🌵');
+    this._obstacle(this._obstacles, 720,  H - 60, '🌵');
+    this._obstacle(this._obstacles, 1200, H - 60, '🌵');
+
     // ── Collisions ────────────────────────────────────────────────────────────
     this.physics.add.overlap(this._player.sprite, this._coins, (_, coin) => this._ramasserCoin(coin));
     this.physics.add.overlap(this._player.sprite, this._goal,  () => { if (!this._done) this._gagner(); });
+    this.physics.add.overlap(this._player.sprite, this._obstacles, () => {
+      if (this._done || this._damageCooldown) return;
+      this._damageCooldown = true;
+      this.time.delayedCall(1000, () => { this._damageCooldown = false; });
+      if (this._player.takeDamage()) { this._done = true; this.time.delayedCall(500, () => this._perdre()); }
+    });
 
     // ── HUD ───────────────────────────────────────────────────────────────────
     this._scoreText = this.add.text(16, 16, '⭐ 0', {
@@ -168,6 +182,14 @@ export class ForetScene extends Phaser.Scene {
   }
 
   // ── Méthodes privées ───────────────────────────────────────────────────────
+
+  _obstacle(group, x, y, emoji) {
+    const rect = this.add.rectangle(x, y, 32, 36, 0xff2200);
+    this.physics.add.existing(rect, true);
+    group.add(rect);
+    this.add.text(x, y + 2, emoji, { fontSize: '26px' }).setOrigin(0.5);
+    return rect;
+  }
 
   _plateforme(group, x, y, width) {
     // TODO: Utilisez votre sprite : group.create(x, y, 'foret_plateforme');

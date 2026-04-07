@@ -177,7 +177,7 @@ export class TemplateScene extends Phaser.Scene {
     }
 
     // ── Title card ────────────────────────────────────────────────────────────
-    const titleCard = this.add.text(this.scale.width / 2, this.scale.height / 2 - 40, 'Niveau Modèle', {
+    const titleCard = this.add.text(this.scale.width / 2, this.scale.height / 2 - 40, 'Étape Modèle', {
       fontFamily: 'Arial',
       fontSize: '36px',
       fontStyle: 'bold',

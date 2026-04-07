@@ -20,26 +20,24 @@ import { HUDScene }      from './core/scenes/HUDScene.js';
 // ─── Level imports ──────────────────────────────────────────────────────────
 // Add one import per level here. The order doesn't matter.
 
-import templateLevel from './levels/_template/index.js';
+// import templateLevel from './levels/_template/index.js';
 
-// TODO: Uncomment each import as you finish building each level:
-// import level01 from './levels/level01-foret/index.js';
-// import level02 from './levels/level02-ocean/index.js';
-// import level03 from './levels/level03-espace/index.js';
-// import level04 from './levels/level04-chateau/index.js';
-// import level05 from './levels/level05-volcan/index.js';
-// import level06 from './levels/level06-arctique/index.js';
+import level01 from './levels/level01-foret/index.js';
+import level02 from './levels/level02-ocean/index.js';
+import level03 from './levels/level03-espace/index.js';
+import level04 from './levels/level04-chateau/index.js';
+import level05 from './levels/level05-volcan/index.js';
+import level06 from './levels/level06-arctique/index.js';
 
 // ─── Level registry ─────────────────────────────────────────────────────────
 // List levels in world map display order.
 const LEVELS = [
-  templateLevel,
-  // level01,
-  // level02,
-  // level03,
-  // level04,
-  // level05,
-  // level06,
+  level01,
+  level02,
+  level03,
+  level04,
+  level05,
+  level06,
 ];
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────

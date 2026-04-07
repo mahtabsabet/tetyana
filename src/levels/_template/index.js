@@ -11,7 +11,7 @@ export default {
     id: '_template',
 
     // TODO: French title of your level
-    titleFR: 'Niveau Modèle',
+    titleFR: 'Étape Modèle',
 
     // TODO: One-sentence French description (simple words for 7-year-olds)
     descriptionFR: 'Un niveau pour apprendre comment faire un niveau !',
