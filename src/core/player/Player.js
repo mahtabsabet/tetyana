@@ -67,6 +67,7 @@ export class Player {
    * Returns true if the player is alive this frame.
    */
   update() {
+    this._syncOverlays();
     if (this._dead) return false;
 
     const onGround = this.sprite.body.blocked.down;
@@ -134,6 +135,9 @@ export class Player {
 
   destroy() {
     this.sprite.destroy();
+    this._hatOverlay?.destroy();
+    this._outfitOverlay?.destroy();
+    this._companionOverlay?.destroy();
   }
 
   // ─── Private ─────────────────────────────────────────────────────────────
@@ -184,14 +188,66 @@ export class Player {
   }
 
   _applyCosmetics(store) {
-    // Cosmetic overlays are optional — add logic here as assets become available.
-    // For now this is a hook for future implementation.
-    const state = store.getState();
-    if (state.equippedHat) {
-      // TODO: add hat sprite overlay when hat assets exist
+    const scene  = this._scene;
+    const s      = store.getState();
+    const sx     = this.sprite.x;
+    const sy     = this.sprite.y;
+    const depth  = (this.sprite.depth ?? 0);
+
+    const HAT_EMOJI = {
+      hat_explorateur: '🪖',
+      hat_sorciere:    '🧙',
+      hat_astronaute:  '👩‍🚀',
+      hat_couronne:    '👑',
+    };
+    const OUTFIT_EMOJI = {
+      outfit_superheros: '🦸',
+      outfit_spatiale:   '🚀',
+    };
+    const COMPANION_EMOJI = {
+      companion_singe:  '🐒',
+      companion_dragon: '🐉',
+    };
+
+    // Hat — floats above the player's head
+    if (s.equippedHat && HAT_EMOJI[s.equippedHat]) {
+      this._hatOverlay = scene.add.text(sx, sy, HAT_EMOJI[s.equippedHat], {
+        fontSize: '22px',
+      }).setOrigin(0.5, 1).setDepth(depth + 2);
     }
-    if (state.equippedCompanion) {
-      // TODO: add companion sprite when assets exist
+
+    // Outfit — sits at the player's centre (rendered behind so it peeks out)
+    if (s.equippedOutfit && OUTFIT_EMOJI[s.equippedOutfit]) {
+      this._outfitOverlay = scene.add.text(sx, sy, OUTFIT_EMOJI[s.equippedOutfit], {
+        fontSize: '20px',
+      }).setOrigin(0.5).setDepth(depth - 1);
+    }
+
+    // Companion — trails just behind the player
+    if (s.equippedCompanion && COMPANION_EMOJI[s.equippedCompanion]) {
+      this._companionOverlay = scene.add.text(sx, sy, COMPANION_EMOJI[s.equippedCompanion], {
+        fontSize: '20px',
+      }).setOrigin(0.5).setDepth(depth + 1);
+    }
+  }
+
+  /** Keep cosmetic emoji overlays glued to the sprite every frame */
+  _syncOverlays() {
+    const x = this.sprite.x;
+    const y = this.sprite.y;
+
+    if (this._hatOverlay) {
+      this._hatOverlay.setPosition(x, y - 26);
+    }
+    if (this._outfitOverlay) {
+      this._outfitOverlay.setPosition(x + (this.sprite.flipX ? 10 : -10), y + 6);
+      this._outfitOverlay.setFlipX(this.sprite.flipX);
+    }
+    if (this._companionOverlay) {
+      // Trails opposite to the direction the player faces
+      const offset = this.sprite.flipX ? 38 : -38;
+      this._companionOverlay.setPosition(x + offset, y + 4);
+      this._companionOverlay.setFlipX(this.sprite.flipX);
     }
   }
 

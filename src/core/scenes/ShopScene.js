@@ -198,11 +198,39 @@ export class ShopScene extends Phaser.Scene {
       });
       card.on('pointerdown', () => this._purchase(item));
     }
+
+    // ── Equip button (cosmetics only) ─────────────────────────────────────
+    if (owned && item.slot) {
+      const state      = this._store.getState();
+      const slotKey    = `equipped${item.slot.charAt(0).toUpperCase() + item.slot.slice(1)}`;
+      const isEquipped = state[slotKey] === item.id;
+
+      if (isEquipped) {
+        this.add.text(x + 8, y + CARD_H - 10, '✓ Équipé', {
+          fontFamily: 'Arial', fontSize: '11px', fontStyle: 'bold', color: '#ffdd44',
+        }).setOrigin(0, 1);
+      } else {
+        const btn = this.add.text(x + 8, y + CARD_H - 10, '▶ Équiper', {
+          fontFamily: 'Arial', fontSize: '11px', fontStyle: 'bold', color: '#aaddff',
+        }).setOrigin(0, 1).setInteractive({ useHandCursor: true });
+        btn.on('pointerover', () => btn.setColor('#ffffff'));
+        btn.on('pointerout',  () => btn.setColor('#aaddff'));
+        btn.on('pointerdown', () => {
+          this._store.equipItem(item.slot, item.id);
+          this.scene.restart({ tabIndex: this._tabIndex });
+        });
+      }
+    }
   }
 
   _purchase(item) {
     const success = this._store.purchaseItem(item.id, item.cost);
     if (!success) return;
+
+    // Auto-equip cosmetics immediately on purchase
+    if (item.slot) {
+      this._store.equipItem(item.slot, item.id);
+    }
 
     const W = this.scale.width;
     const H = this.scale.height;
