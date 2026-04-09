@@ -4,8 +4,8 @@ import { OceanScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level02-ocean',
-    titleFR: "L'Océan Mystérieux",
-    descriptionFR: "Plonge dans l'océan avec Madame Tetyana !",
+    titleFR: 'Lieu 2',
+    descriptionFR: 'Continue l\'aventure !',
     thumbnailKey: 'ocean_thumb',
     order: 2,
     unlockAfterLevel: null,

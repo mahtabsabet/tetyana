@@ -4,8 +4,8 @@ import { EspaceScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level03-espace',
-    titleFR: "L'Aventure dans l'Espace",
-    descriptionFR: 'Explore les étoiles avec Madame Tetyana !',
+    titleFR: 'Lieu 3',
+    descriptionFR: 'Continue l\'aventure !',
     thumbnailKey: 'espace_thumb',
     order: 3,
     unlockAfterLevel: null,

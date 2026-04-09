@@ -115,7 +115,7 @@ export class ForetScene extends Phaser.Scene {
 
     // ── But (temple) ──────────────────────────────────────────────────────────
     // TODO: Remplacez l'emoji par votre sprite : this.add.image(1750, H - 90, 'foret_goal')
-    this._goal = this.add.text(1820, H - 90, '🏛️', { fontSize: '56px' }).setOrigin(0.5);
+    this._goal = this.add.text(1820, H - 90, '🗝️', { fontSize: '56px' }).setOrigin(0.5);
     this.physics.add.existing(this._goal, true);
     this.tweens.add({ targets: this._goal, y: H - 110, duration: 900, yoyo: true, repeat: -1 });
 

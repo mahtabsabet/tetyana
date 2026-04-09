@@ -6,8 +6,8 @@ import { ForetScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level01-foret',
-    titleFR: 'La Forêt Enchantée',
-    descriptionFR: 'Aide Madame Tetyana à traverser la forêt magique !',
+    titleFR: 'Lieu 1',
+    descriptionFR: 'Commence l\'aventure !',
     thumbnailKey: 'foret_thumb',
     order: 1,
     unlockAfterLevel: null,

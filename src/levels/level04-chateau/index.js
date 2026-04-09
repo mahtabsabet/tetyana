@@ -4,8 +4,8 @@ import { ChateauScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level04-chateau',
-    titleFR: 'Le Château Hanté',
-    descriptionFR: 'Explore le vieux château mystérieux !',
+    titleFR: 'Lieu 4',
+    descriptionFR: 'Continue l\'aventure !',
     thumbnailKey: 'chateau_thumb',
     order: 4,
     unlockAfterLevel: null,

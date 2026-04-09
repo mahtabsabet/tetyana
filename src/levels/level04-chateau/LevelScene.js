@@ -81,7 +81,7 @@ export class ChateauScene extends Phaser.Scene {
     this._coins = this.physics.add.staticGroup();
     // TODO: Ajoutez vos collectibles ici !
 
-    this._goal = this.add.text(1820, H - 90, '🏆', { fontSize: '56px' }).setOrigin(0.5);
+    this._goal = this.add.text(1820, H - 90, '🗝️', { fontSize: '56px' }).setOrigin(0.5);
     this.physics.add.existing(this._goal, true);
     this.tweens.add({ targets: this._goal, y: H - 110, duration: 900, yoyo: true, repeat: -1 });
 

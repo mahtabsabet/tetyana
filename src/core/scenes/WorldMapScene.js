@@ -74,7 +74,17 @@ export class WorldMapScene extends Phaser.Scene {
       strokeThickness: 4,
     }).setOrigin(1, 0);
 
-    this.add.text(W - 16, 46, '🛍️ Boutique', {
+    const keyCount = Object.keys(state.levelsCompleted).length;
+    this._keysText = this.add.text(W - 16, 42, `🗝️ ${keyCount} / 6`, {
+      fontFamily: 'Arial',
+      fontSize: '16px',
+      fontStyle: 'bold',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(1, 0);
+
+    this.add.text(W - 16, 64, '🛍️ Boutique', {
       fontFamily: 'Arial',
       fontSize: '16px',
       fontStyle: 'bold',
@@ -172,6 +182,11 @@ export class WorldMapScene extends Phaser.Scene {
       }
     });
 
+    // ── Treasure chest (unlocked when all 6 keys collected) ────────────────
+    if (keyCount >= 6) {
+      this._drawTreasureChest(W, H);
+    }
+
     this._tooltip = null;
 
     store.on('points_changed', ({ spendable }) => {
@@ -179,6 +194,59 @@ export class WorldMapScene extends Phaser.Scene {
     });
 
     this.cameras.main.fadeIn(400);
+  }
+
+  _drawTreasureChest(W, H) {
+    const cx = W * 0.5;
+    const cy = H * 0.18;
+
+    // Glowing backdrop
+    const glow = this.add.circle(cx, cy, 52, 0xffd700, 0.25);
+    this.tweens.add({ targets: glow, scaleX: 1.2, scaleY: 1.2, alpha: 0, duration: 1000, yoyo: true, repeat: -1 });
+
+    const chest = this.add.text(cx, cy, '📦', { fontSize: '52px' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.tweens.add({ targets: chest, y: cy - 8, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    this.add.text(cx, cy + 46, '✨ Coffre au trésor !', {
+      fontFamily: 'Arial',
+      fontSize: '13px',
+      fontStyle: 'bold',
+      color: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 3,
+      align: 'center',
+    }).setOrigin(0.5, 0);
+
+    chest.on('pointerdown', () => this._openTreasureChest(W, H));
+  }
+
+  _openTreasureChest(W, H) {
+    const overlay = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.75).setDepth(60);
+    const box     = this.add.rectangle(W / 2, H / 2, 420, 260, 0x1a1a3e).setDepth(61).setStrokeStyle(4, 0xffd700);
+
+    this.add.text(W / 2, H / 2 - 90, '🎉 Tu as toutes les clés !', {
+      fontFamily: 'Arial', fontSize: '20px', fontStyle: 'bold',
+      color: '#ffd700', stroke: '#000000', strokeThickness: 4, align: 'center',
+    }).setOrigin(0.5).setDepth(62);
+
+    this.add.text(W / 2, H / 2 - 46, '📚 📖 📚 📖 📚', {
+      fontSize: '38px',
+    }).setOrigin(0.5).setDepth(62);
+
+    this.add.text(W / 2, H / 2 + 8, 'Ta récompense : des livres !', {
+      fontFamily: 'Arial', fontSize: '16px',
+      color: '#ffffff', stroke: '#000000', strokeThickness: 3, align: 'center',
+    }).setOrigin(0.5).setDepth(62);
+
+    const closeBtn = this.add.text(W / 2, H / 2 + 70, '✓ Super !', {
+      fontFamily: 'Arial', fontSize: '18px', fontStyle: 'bold',
+      color: '#ffffff', backgroundColor: '#22224488', padding: { x: 20, y: 10 },
+    }).setOrigin(0.5).setDepth(62).setInteractive({ useHandCursor: true });
+
+    const all = [overlay, box, closeBtn];
+    const close = () => all.forEach(o => o.destroy());
+    closeBtn.on('pointerdown', close);
+    this.input.keyboard.once('keydown-ESC', close);
   }
 
   _launchLevel(lvlModule) {

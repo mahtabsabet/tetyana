@@ -4,8 +4,8 @@ import { VolcanScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level05-volcan',
-    titleFR: 'Le Volcan du Dragon',
-    descriptionFR: 'Grimpe le volcan et trouve le dragon !',
+    titleFR: 'Lieu 5',
+    descriptionFR: 'Continue l\'aventure !',
     thumbnailKey: 'volcan_thumb',
     order: 5,
     unlockAfterLevel: null,

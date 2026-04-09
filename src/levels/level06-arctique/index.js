@@ -4,8 +4,8 @@ import { ArctiqueScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level06-arctique',
-    titleFR: 'La Toundra Arctique',
-    descriptionFR: 'Glisse sur la glace dans le grand froid !',
+    titleFR: 'Lieu 6',
+    descriptionFR: 'Continue l\'aventure !',
     thumbnailKey: 'arctique_thumb',
     order: 6,
     unlockAfterLevel: null,
