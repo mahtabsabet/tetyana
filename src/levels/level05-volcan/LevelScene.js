@@ -9,14 +9,28 @@ import { showQuiz }            from '../../core/scenes/QuizOverlay.js';
 // ── Questions vocabulaire ────────────────────────────────────────────────────
 const QUIZ_QUESTIONS = [
   {
-    imageEmoji: '🌋',
-    correct: 'Le volcan',
-    wrong:   ['La montagne', 'Le feu', 'La fumée'],
+    imageEmoji: '🐐',
+    question:   'Quel animal vit dans la montagne ?',
+    correct:    'La chèvre de montagne',
+    wrong:      ['Le requin', 'Le dauphin', 'La baleine'],
   },
   {
-    imageEmoji: '🔥',
-    correct: 'Le feu',
-    wrong:   ["L'eau", 'La glace', 'La fumée'],
+    imageEmoji: '🌋',
+    question:   'Quel volcan est le plus grand ?',
+    correct:    'Le Mauna Loa',
+    wrong:      ['Le Vésuve', "L'Etna", 'Le Mont Fuji'],
+  },
+  {
+    imageEmoji: '🐉',
+    question:   'Est-ce que les dragons existent ?',
+    correct:    'Non',
+    wrong:      ['Oui', 'Seulement en Chine', 'Peut-être'],
+  },
+  {
+    imageEmoji: '🌋',
+    question:   'Quand est-ce que le volcan s\'explose ?',
+    correct:    'Quand la lave sort',
+    wrong:      ['Quand le gaz sort', 'Quand les roches sortent', 'Il neige beaucoup'],
   },
 ];
 
