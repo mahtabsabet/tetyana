@@ -99,7 +99,7 @@ export class OceanScene extends Phaser.Scene {
     [[180,H-80],[310,H-170],[570,H-260],[670,H-260],[830,H-190],[890,H-190],
      [1080,H-290],[1160,H-120],[1330,H-200],[1580,H-170]]
       .slice(0, NUM_COLLECTIBLES).forEach(([cx, cy]) => {
-        const c = this.add.text(cx, cy, '🌿', { fontSize: '26px' }).setOrigin(0.5);
+        const c = this.add.text(cx, cy, '🪸', { fontSize: '26px' }).setOrigin(0.5);
         this.physics.add.existing(c, true);
         this._coins.add(c);
       });

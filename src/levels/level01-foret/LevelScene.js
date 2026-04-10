@@ -5,7 +5,7 @@
 //
 // Thème : La forêt avec des animaux
 // Vocabulaire français : le singe, le perroquet, la grenouille, la banane
-// Collectibles : des bananes 🍌
+// Collectibles : des fruits et champignons 🍄🍎🍇🫐🍓🍒🌰🍑🍋
 // Ennemis : des grenouilles sauteuses 🐸
 // But : trouver le trésor caché dans le temple 🏛️
 
@@ -100,15 +100,15 @@ export class ForetScene extends Phaser.Scene {
     this._plateforme(platforms, 1300, H - 160, 180);
     this._plateforme(platforms, 1550, H - 130, 200);
 
-    // ── Collectibles (bananes) ────────────────────────────────────────────────
+    // ── Collectibles (fruits et champignons) ─────────────────────────────────
     this._coins = this.physics.add.staticGroup();
     [
-      [180, H - 80], [310, H - 170], [560, H - 260], [660, H - 260],
-      [810, H - 190], [870, H - 190], [1060, H - 290], [1150, H - 120],
-      [1320, H - 200], [1570, H - 170],
-    ].slice(0, NUM_COLLECTIBLES).forEach(([cx, cy]) => {
-      // TODO: Remplacez l'emoji par votre sprite : this._coins.create(cx, cy, 'foret_coin');
-      const coin = this.add.text(cx, cy, '🍌', { fontSize: '26px' }).setOrigin(0.5);
+      [180, H - 80,  '🍄'], [310, H - 170, '🍎'], [560, H - 260, '🍇'],
+      [660, H - 260, '🫐'], [810, H - 190, '🍓'], [870, H - 190, '🍒'],
+      [1060, H - 290, '🌰'], [1150, H - 120, '🍑'], [1320, H - 200, '🍄'],
+      [1570, H - 170, '🍋'],
+    ].slice(0, NUM_COLLECTIBLES).forEach(([cx, cy, emoji]) => {
+      const coin = this.add.text(cx, cy, emoji, { fontSize: '26px' }).setOrigin(0.5);
       this.physics.add.existing(coin, true);
       this._coins.add(coin);
     });

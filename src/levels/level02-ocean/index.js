@@ -4,7 +4,7 @@ import { OceanScene } from './LevelScene.js';
 export default {
   meta: {
     id: 'level02-ocean',
-    titleFR: 'Lieu 2',
+    titleFR: "L'Océan Mystérieux",
     descriptionFR: 'Continue l\'aventure !',
     thumbnailKey: 'ocean_thumb',
     order: 2,
