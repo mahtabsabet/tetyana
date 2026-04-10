@@ -13,17 +13,19 @@ import { initVirtualControls,
          hideVirtualControls } from '../../core/input/VirtualControls.js';
 import { showQuiz }            from '../../core/scenes/QuizOverlay.js';
 
-// ── Questions vocabulaire — PLACEHOLDERS (groupe 6 : remplacez par vos vraies questions !) ──
+// ── Questions vocabulaire ────────────────────────────────────────────────────
 const QUIZ_QUESTIONS = [
   {
-    imageEmoji: '🧊',
-    correct: 'La glace',
-    wrong:   ['La neige', "L'eau", 'La mer'],
+    imageEmoji: '🐾',
+    question:   'Quel animal vit dans la toundra arctique ?',
+    correct:    "L'ours polaire",
+    wrong:      ['Le requin', 'Le lion', 'Le perroquet'],
   },
   {
-    imageEmoji: '🐧',
-    correct: 'Le manchot',
-    wrong:   ['Le phoque', "L'ours polaire", 'Le renne'],
+    imageEmoji: '🦌',
+    question:   'Quel animal vit dans la toundra arctique ?',
+    correct:    'Le caribou',
+    wrong:      ['Le requin', 'Le dauphin', 'Le singe'],
   },
 ];
 
@@ -60,13 +62,7 @@ export class ArctiqueScene extends Phaser.Scene {
     const W = this.scale.width;
     const H = this.scale.height;
 
-    // TODO: Remplacez par votre arrière-plan
     this.add.rectangle(W, H / 2, W * 2, H, BG_COLOR);
-    this.add.text(W / 2, H / 2, '❄️', { fontSize: '200px' }).setOrigin(0.5).setAlpha(0.15);
-    this.add.text(W / 2, H / 2 + 100, 'À construire par le groupe 6 !', {
-      fontFamily: 'Arial', fontSize: '28px', color: '#ffffff',
-      stroke: '#000000', strokeThickness: 4,
-    }).setOrigin(0.5);
 
     this.physics.world.setBounds(0, 0, W * 2, H);
     this.cameras.main.setBounds(0, 0, W * 2, H);
@@ -76,10 +72,24 @@ export class ArctiqueScene extends Phaser.Scene {
     this.physics.add.existing(sol, true);
     platforms.add(sol);
 
-    // TODO: Ajoutez vos plateformes ici !
+    this._plateforme(platforms, 280,  H - 130, 160);
+    this._plateforme(platforms, 540,  H - 210, 140);
+    this._plateforme(platforms, 800,  H - 150, 180);
+    this._plateforme(platforms, 1060, H - 240, 140);
+    this._plateforme(platforms, 1320, H - 160, 180);
+    this._plateforme(platforms, 1580, H - 130, 200);
 
+    // Collectibles — placeholder squares
     this._coins = this.physics.add.staticGroup();
-    // TODO: Ajoutez vos collectibles ici !
+    [
+      [150, H - 80],  [290, H - 170], [550, H - 250], [650, H - 250],
+      [810, H - 190], [870, H - 190], [1070, H - 280], [1150, H - 110],
+      [1340, H - 200],[1590, H - 170],
+    ].slice(0, NUM_COLLECTIBLES).forEach(([cx, cy]) => {
+      const sq = this.add.rectangle(cx, cy, 18, 18, 0xaaddff).setStrokeStyle(2, 0xffffff);
+      this.physics.add.existing(sq, true);
+      this._coins.add(sq);
+    });
 
     this._goal = this.add.text(1820, H - 90, '🗝️', { fontSize: '56px' }).setOrigin(0.5);
     this.physics.add.existing(this._goal, true);
@@ -91,12 +101,12 @@ export class ArctiqueScene extends Phaser.Scene {
     this.physics.add.collider(this._player.sprite, platforms);
     this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
 
-    // ── Obstacles (stalactites — réduisent les points de vie au contact) ──────
-    // TODO: Remplacez les emplacements et l'emoji par ceux de votre niveau
+    // ── Obstacles : ours polaires et renards arctiques qui patrouillent ──────
     this._obstacles = this.physics.add.staticGroup();
-    this._obstacle(this._obstacles, 400,  H - 60, '🧊');
-    this._obstacle(this._obstacles, 900,  H - 60, '🧊');
-    this._obstacle(this._obstacles, 1400, H - 60, '🧊');
+    this._animalObstacle(this._obstacles, 420,  H - 60, '🐻‍❄️', 50);
+    this._animalObstacle(this._obstacles, 950,  H - 60, '🦊',   40);
+    this._animalObstacle(this._obstacles, 1250, H - 60, '🐻‍❄️', 55);
+    this._animalObstacle(this._obstacles, 1600, H - 60, '🦊',   45);
 
     this.physics.add.overlap(this._player.sprite, this._coins, (_, c) => this._ramasserCoin(c));
     this.physics.add.overlap(this._player.sprite, this._goal,  () => { if (!this._done) this._gagner(); });
@@ -130,15 +140,29 @@ export class ArctiqueScene extends Phaser.Scene {
       if (this._player.takeDamage()) { this._done = true; this.time.delayedCall(500, () => this._perdre()); }
       else { this._player.sprite.setPosition(80, this.scale.height - 80); this._player.sprite.setVelocity(0, 0); }
     }
-    this._scoreText.setText();
+    this._scoreText.setText(`⭐ ${this._score}`);
     this._viesText.setText('❤️'.repeat(this._player.lives) + '🖤'.repeat(Math.max(0, 3 - this._player.lives)));
   }
 
-  _obstacle(group, x, y, emoji) {
-    const rect = this.add.rectangle(x, y, 32, 36, 0xff2200);
+  // Animal obstacle that paces back and forth
+  _animalObstacle(group, x, y, emoji, range) {
+    const rect = this.add.rectangle(x, y, 40, 40, 0xff2200).setAlpha(0.01);
     this.physics.add.existing(rect, true);
     group.add(rect);
-    this.add.text(x, y + 2, emoji, { fontSize: '26px' }).setOrigin(0.5);
+    const label = this.add.text(x, y, emoji, { fontSize: '32px' }).setOrigin(0.5);
+    this.tweens.add({
+      targets: [rect, label],
+      x: { from: x - range, to: x + range },
+      duration: 1600 + Math.floor(range * 18),
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      onUpdate: () => rect.body.reset(rect.x, rect.y),
+    });
+  }
+
+  _plateforme(group, x, y, width) {
+    const rect = this.add.rectangle(x, y, width, 24, GROUND_COLOR);
+    this.physics.add.existing(rect, true);
+    group.add(rect);
     return rect;
   }
 
