@@ -1,13 +1,10 @@
 // level01-foret/LevelScene.js — La Forêt Enchantée
 //
-// GROUPE 1 — votre niveau commence ici !
-// Lisez GUIDE_NIVEAU.md pour les instructions.
-//
-// Thème : La forêt avec des animaux
-// Vocabulaire français : le singe, le perroquet, la grenouille, la banane
-// Collectibles : des fruits et champignons 🍄🍎🍇🫐🍓🍒🌰🍑🍋
-// Ennemis : des grenouilles sauteuses 🐸
-// But : trouver le trésor caché dans le temple 🏛️
+// Thème : La forêt enchantée
+// Personnage : écureuil 🐿️
+// Obstacles : renards 🦊 qui patrouillent
+// Boss de fin : ours 🐻 (instakill au contact)
+// Collectibles : glands 🌰
 
 import { Player }              from '../../core/player/Player.js';
 import { InputManager }        from '../../core/input/InputManager.js';
@@ -15,33 +12,28 @@ import { initVirtualControls,
          hideVirtualControls } from '../../core/input/VirtualControls.js';
 import { showQuiz }            from '../../core/scenes/QuizOverlay.js';
 
-// ── Questions vocabulaire (2 par niveau) ─────────────────────────────────────
-// TODO: Remplacez imageEmoji par imageKey quand les vraies images sont prêtes.
-//   Chargez-les dans preload() : this.load.image('foret_quiz_recyclage', ...)
+// ── Questions vocabulaire ────────────────────────────────────────────────────
 const QUIZ_QUESTIONS = [
   {
-    imageEmoji: '♻️',
-    // imageKey: 'foret_quiz_recyclage',
-    correct: 'Le recyclage',
-    wrong:   ['La pollution', 'La forêt', 'Le soleil'],
+    imageEmoji: '🦊',
+    question:   'Quel animal vit dans une cave ?',
+    correct:    'Un renard',
+    wrong:      ['Un oiseau', 'Une poisson', 'Une baleine'],
   },
   {
-    imageEmoji: '🏭',
-    // imageKey: 'foret_quiz_usine',
-    correct: 'La pollution',
-    wrong:   ['Le recyclage', 'La neige', 'La pluie'],
+    imageEmoji: '🐿️',
+    question:   "Où est-ce que l'écureuil cache ses noix ?",
+    correct:    'Dans un arbre',
+    wrong:      ['Dans le ciel', "Dans l'océan", 'Dans une maison'],
   },
 ];
 
-// ── TODO: Personnalisez ces valeurs pour votre niveau ────────────────────────
-
-const BG_COLOR         = 0x228b22;   // Vert forêt
-const GROUND_COLOR     = 0x5c4033;   // Brun terre
+const BG_COLOR         = 0x1a3a1a;  // Vert forêt sombre
+const GROUND_COLOR     = 0x3d2b1f;  // Brun terre
+const PLATFORM_COLOR   = 0x2d5a1b;  // Vert mousse
 const NUM_COLLECTIBLES = 10;
 const POINTS_PER_COIN  = 5;
-const TIME_LIMIT       = 90;         // secondes (0 = pas de limite)
-
-// ─────────────────────────────────────────────────────────────────────────────
+const TIME_LIMIT       = 90;
 
 export class ForetScene extends Phaser.Scene {
   static _context = null;
@@ -59,40 +51,33 @@ export class ForetScene extends Phaser.Scene {
     this._damageCooldown = false;
   }
 
-  preload() {
-    // TODO: Chargez vos images ici. Exemples :
-    // this.load.image('foret_bg',    new URL('./assets/backgrounds/foret_bg.png', import.meta.url).href);
-    // this.load.image('foret_coin',  new URL('./assets/sprites/banane.png', import.meta.url).href);
-    // this.load.image('foret_enemy', new URL('./assets/sprites/grenouille.png', import.meta.url).href);
-    // this.load.image('foret_goal',  new URL('./assets/sprites/temple.png', import.meta.url).href);
-  }
+  preload() {}
 
   create() {
     const W = this.scale.width;
     const H = this.scale.height;
 
-    // ── Arrière-plan ─────────────────────────────────────────────────────────
-    // TODO: Remplacez par votre image : this.add.image(W/2, H/2, 'foret_bg').setDisplaySize(W*2, H);
+    // ── Arrière-plan ──────────────────────────────────────────────────────────
     this.add.rectangle(W, H / 2, W * 2, H, BG_COLOR);
 
-    // Arbres décoratifs (à remplacer par vos dessins)
-    ['🌳', '🌲', '🌴', '🌳', '🌲', '🌳', '🌲'].forEach((tree, i) => {
-      this.add.text(100 + i * 280, H - 90, tree, { fontSize: '70px' }).setOrigin(0.5, 1);
+    // Arbres décoratifs
+    ['🌲', '🌳', '🌲', '🌳', '🌲', '🌳', '🌲', '🌳'].forEach((tree, i) => {
+      this.add.text(80 + i * 260, H - 80, tree, { fontSize: '72px' }).setOrigin(0.5, 1);
+    });
+    // Champignons et fleurs magiques
+    ['🍄', '🌸', '🍄', '🌸', '🍄'].forEach((deco, i) => {
+      this.add.text(160 + i * 400, H - 48, deco, { fontSize: '28px' }).setOrigin(0.5, 1);
     });
 
-    // ── Physique ─────────────────────────────────────────────────────────────
+    // ── Physique ──────────────────────────────────────────────────────────────
     this.physics.world.setBounds(0, 0, W * 2, H);
     this.cameras.main.setBounds(0, 0, W * 2, H);
 
     const platforms = this.physics.add.staticGroup();
-
-    // Sol principal
     const sol = this.add.rectangle(W, H - 20, W * 2, 40, GROUND_COLOR);
     this.physics.add.existing(sol, true);
     platforms.add(sol);
 
-    // TODO: Ajoutez vos plateformes ici !
-    // Exemple : this._plateforme(platforms, 400, H - 140, 200);
     this._plateforme(platforms, 300,  H - 130, 160);
     this._plateforme(platforms, 550,  H - 220, 140);
     this._plateforme(platforms, 800,  H - 150, 180);
@@ -100,47 +85,61 @@ export class ForetScene extends Phaser.Scene {
     this._plateforme(platforms, 1300, H - 160, 180);
     this._plateforme(platforms, 1550, H - 130, 200);
 
-    // ── Collectibles (fruits et champignons) ─────────────────────────────────
+    // ── Collectibles (glands 🌰) ──────────────────────────────────────────────
     this._coins = this.physics.add.staticGroup();
     [
-      [180, H - 80,  '🍄'], [310, H - 170, '🍎'], [560, H - 260, '🍇'],
-      [660, H - 260, '🫐'], [810, H - 190, '🍓'], [870, H - 190, '🍒'],
-      [1060, H - 290, '🌰'], [1150, H - 120, '🍑'], [1320, H - 200, '🍄'],
-      [1570, H - 170, '🍋'],
-    ].slice(0, NUM_COLLECTIBLES).forEach(([cx, cy, emoji]) => {
-      const coin = this.add.text(cx, cy, emoji, { fontSize: '26px' }).setOrigin(0.5);
+      [180, H - 80],   [310, H - 170], [560, H - 260], [660, H - 260],
+      [810, H - 190],  [870, H - 190], [1060, H - 290], [1150, H - 120],
+      [1320, H - 200], [1570, H - 170],
+    ].slice(0, NUM_COLLECTIBLES).forEach(([cx, cy]) => {
+      const coin = this.add.text(cx, cy, '🌰', { fontSize: '26px' }).setOrigin(0.5);
       this.physics.add.existing(coin, true);
       this._coins.add(coin);
     });
 
-    // ── But (temple) ──────────────────────────────────────────────────────────
-    // TODO: Remplacez l'emoji par votre sprite : this.add.image(1750, H - 90, 'foret_goal')
+    // ── But ───────────────────────────────────────────────────────────────────
     this._goal = this.add.text(1820, H - 90, '🗝️', { fontSize: '56px' }).setOrigin(0.5);
     this.physics.add.existing(this._goal, true);
     this.tweens.add({ targets: this._goal, y: H - 110, duration: 900, yoyo: true, repeat: -1 });
 
-    // ── Joueur ────────────────────────────────────────────────────────────────
+    // ── Joueur (écureuil 🐿️) ──────────────────────────────────────────────────
     this._input  = new InputManager(this);
     initVirtualControls(this._input);
     this._player = new Player(this, 80, H - 80, this._store, this._input);
+    this._player.sprite.setAlpha(0);  // Caché — l'emoji écureuil est affiché à la place
+    this._squirrelEmoji = this.add.text(80, H - 80, '🐿️', { fontSize: '36px' }).setOrigin(0.5).setDepth(5);
+
     this.physics.add.collider(this._player.sprite, platforms);
     this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
 
-    // ── Obstacles (réduisent les points de vie au contact) ────────────────────
-    // TODO: Remplacez les emplacements et l'emoji par ceux de votre niveau
+    // ── Obstacles : renards qui patrouillent ──────────────────────────────────
     this._obstacles = this.physics.add.staticGroup();
-    this._obstacle(this._obstacles, 430,  H - 60, '🌵');
-    this._obstacle(this._obstacles, 720,  H - 60, '🌵');
-    this._obstacle(this._obstacles, 1200, H - 60, '🌵');
+    this._renardObstacle(this._obstacles, 430,  H - 60, 55);
+    this._renardObstacle(this._obstacles, 700,  H - 60, 45);
+    this._renardObstacle(this._obstacles, 980,  H - 60, 50);
+    this._renardObstacle(this._obstacles, 1250, H - 60, 60);
+    this._renardObstacle(this._obstacles, 1500, H - 60, 40);
+
+    // ── Boss de fin : ours (instakill) ────────────────────────────────────────
+    this.add.text(1700, H - 72, '🌲', { fontSize: '72px' }).setOrigin(0.5).setDepth(6);
+    this.add.text(1800, H - 72, '🌲', { fontSize: '72px' }).setOrigin(0.5).setDepth(6);
+    this._bossGroup = this.physics.add.staticGroup();
+    this._oursObstacle(this._bossGroup, 1750, H - 62, 50);
 
     // ── Collisions ────────────────────────────────────────────────────────────
     this.physics.add.overlap(this._player.sprite, this._coins, (_, coin) => this._ramasserCoin(coin));
-    this.physics.add.overlap(this._player.sprite, this._goal,  () => { if (!this._done) this._gagner(); });
+    this.physics.add.overlap(this._player.sprite, this._goal, () => { if (!this._done) this._gagner(); });
     this.physics.add.overlap(this._player.sprite, this._obstacles, () => {
       if (this._done || this._damageCooldown) return;
       this._damageCooldown = true;
       this.time.delayedCall(1000, () => { this._damageCooldown = false; });
       if (this._player.takeDamage()) { this._done = true; this.time.delayedCall(500, () => this._perdre()); }
+    });
+    // Ours = instakill
+    this.physics.add.overlap(this._player.sprite, this._bossGroup, () => {
+      if (this._done) return;
+      this._done = true;
+      this.time.delayedCall(500, () => this._perdre());
     });
 
     // ── HUD ───────────────────────────────────────────────────────────────────
@@ -148,26 +147,21 @@ export class ForetScene extends Phaser.Scene {
       fontFamily: 'Arial', fontSize: '22px', fontStyle: 'bold',
       color: '#ffdd44', stroke: '#000', strokeThickness: 4,
     }).setScrollFactor(0);
-
     this._viesText = this.add.text(16, 50, '❤️ ❤️ ❤️', { fontSize: '20px' }).setScrollFactor(0);
 
-    if (TIME_LIMIT > 0) {
-      this._timerText = this.add.text(W / 2, 16, `⏱ ${TIME_LIMIT}`, {
-        fontFamily: 'Arial', fontSize: '20px', fontStyle: 'bold',
-        color: '#ffffff', stroke: '#000', strokeThickness: 4,
-      }).setScrollFactor(0).setOrigin(0.5, 0);
-
-      this.time.addEvent({ delay: 1000, repeat: TIME_LIMIT - 1, callback: this._tickerMinute, callbackScope: this });
-    }
+    this._timerText = this.add.text(W / 2, 16, `⏱ ${TIME_LIMIT}`, {
+      fontFamily: 'Arial', fontSize: '20px', fontStyle: 'bold',
+      color: '#ffffff', stroke: '#000', strokeThickness: 4,
+    }).setScrollFactor(0).setOrigin(0.5, 0);
+    this.time.addEvent({ delay: 1000, repeat: TIME_LIMIT - 1, callback: this._tick, callbackScope: this });
 
     // Titre du niveau
     const titre = this.add.text(W / 2, H / 2 - 40, 'La Forêt Enchantée', {
       fontFamily: 'Arial', fontSize: '34px', fontStyle: 'bold',
-      color: '#ffffff', stroke: '#000', strokeThickness: 6,
+      color: '#aaffaa', stroke: '#000', strokeThickness: 6,
     }).setScrollFactor(0).setOrigin(0.5).setDepth(10);
     this.tweens.add({ targets: titre, alpha: 0, delay: 2000, duration: 600, onComplete: () => titre.destroy() });
 
-    // Bouton retour
     this.add.text(W - 16, 16, '↩ Carte', {
       fontFamily: 'Arial', fontSize: '15px', color: '#cccccc', stroke: '#000', strokeThickness: 3,
     }).setScrollFactor(0).setOrigin(1, 0).setDepth(10).setInteractive({ useHandCursor: true })
@@ -197,22 +191,46 @@ export class ForetScene extends Phaser.Scene {
       else { this._player.sprite.setPosition(80, this.scale.height - 80); this._player.sprite.setVelocity(0, 0); }
     }
 
-    this._mettreAJourHUD();
+    // Synchroniser l'emoji écureuil avec la position du joueur
+    this._squirrelEmoji.setPosition(this._player.x, this._player.y);
+    this._squirrelEmoji.setFlipX(this._player.sprite.flipX);
+
+    this._scoreText.setText(`⭐ ${this._score}`);
+    this._viesText.setText('❤️'.repeat(this._player.lives) + '🖤'.repeat(Math.max(0, 3 - this._player.lives)));
   }
 
-  // ── Méthodes privées ───────────────────────────────────────────────────────
-
-  _obstacle(group, x, y, emoji) {
-    const rect = this.add.rectangle(x, y, 32, 36, 0xff2200);
+  // ── Renard qui patrouille ─────────────────────────────────────────────────
+  _renardObstacle(group, x, y, range) {
+    const rect = this.add.rectangle(x, y, 40, 38, 0xff2200).setAlpha(0.01);
     this.physics.add.existing(rect, true);
     group.add(rect);
-    this.add.text(x, y + 2, emoji, { fontSize: '26px' }).setOrigin(0.5);
-    return rect;
+    const label = this.add.text(x, y, '🦊', { fontSize: '32px' }).setOrigin(0.5);
+    this.tweens.add({
+      targets: [rect, label],
+      x: { from: x - range, to: x + range },
+      duration: 1400 + Math.floor(range * 20),
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      onUpdate: () => rect.body.reset(rect.x, rect.y),
+    });
+  }
+
+  // ── Ours boss (instakill) ─────────────────────────────────────────────────
+  _oursObstacle(group, x, y, range) {
+    const rect = this.add.rectangle(x, y, 52, 52, 0xff0000).setAlpha(0.01).setDepth(2);
+    this.physics.add.existing(rect, true);
+    group.add(rect);
+    const label = this.add.text(x, y, '🐻', { fontSize: '48px' }).setOrigin(0.5).setDepth(2);
+    this.tweens.add({
+      targets: [rect, label],
+      x: { from: x - range, to: x + range },
+      duration: 2000,
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      onUpdate: () => rect.body.reset(rect.x, rect.y),
+    });
   }
 
   _plateforme(group, x, y, width) {
-    // TODO: Utilisez votre sprite : group.create(x, y, 'foret_plateforme');
-    const rect = this.add.rectangle(x, y, width, 24, 0x4a7c3f);
+    const rect = this.add.rectangle(x, y, width, 24, PLATFORM_COLOR);
     this.physics.add.existing(rect, true);
     group.add(rect);
     return rect;
@@ -226,19 +244,13 @@ export class ForetScene extends Phaser.Scene {
     if (this.cache.audio.exists('snd_coin')) this.sound.play('snd_coin', { volume: 0.7 });
   }
 
-  _tickerMinute() {
+  _tick() {
     this._timeLeft--;
     if (this._timerText) {
       this._timerText.setText(`⏱ ${this._timeLeft}`);
       if (this._timeLeft <= 10) this._timerText.setColor('#ff4444');
     }
     if (this._timeLeft <= 0 && !this._done) { this._done = true; this._perdre(); }
-  }
-
-  _mettreAJourHUD() {
-    this._scoreText.setText(`⭐ ${this._score}`);
-    const vies = '❤️'.repeat(this._player.lives) + '🖤'.repeat(Math.max(0, 3 - this._player.lives));
-    this._viesText.setText(vies);
   }
 
   _calcEtoiles() {
@@ -261,14 +273,12 @@ export class ForetScene extends Phaser.Scene {
       fontFamily: 'Arial', fontSize: '48px', fontStyle: 'bold',
       color: '#ffdd44', stroke: '#000', strokeThickness: 6,
     }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
-
     this.add.text(W / 2, H / 2, '⭐'.repeat(etoiles) + '☆'.repeat(3 - etoiles), {
       fontSize: '40px',
     }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
 
     if (this.cache.audio.exists('snd_success')) this.sound.play('snd_success');
 
-    // Show vocabulary quiz before completing the level
     this.time.delayedCall(1500, () => {
       showQuiz(this, QUIZ_QUESTIONS, (bonus) => {
         this._score += bonus;
@@ -288,7 +298,7 @@ export class ForetScene extends Phaser.Scene {
     }).setScrollFactor(0).setOrigin(0.5).setDepth(20);
     if (this.cache.audio.exists('snd_fail')) this.sound.play('snd_fail');
     this.time.delayedCall(2000, () => {
-      this._ctx?.onComplete({ levelId: 'level01-foret', completed: false, pointsEarned: this._score, starsEarned: 0, durationSeconds: TIME_LIMIT - this._timeLeft });
+      this._ctx?.onComplete({ levelId: 'level01-foret', completed: false, pointsEarned: this._score, starsEarned: 0, durationSeconds: 0 });
       this._terminer();
     });
   }
