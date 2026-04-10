@@ -5,8 +5,8 @@
 //
 // Thème : Le fond de l'océan
 // Vocabulaire : le requin, la pieuvre, le dauphin, le corail, la perle
-// Collectibles : des perles 🫧
-// Ennemis : des méduses électriques 🪼
+// Collectibles : des algues 🌿
+// Ennemis : des requins 🦈 et un grand tourbillon 🌪️
 // But : ouvrir le coffre au trésor au fond de l'eau 🪙
 
 import { Player }              from '../../core/player/Player.js';
@@ -30,6 +30,12 @@ const QUIZ_QUESTIONS = [
     // imageKey: 'ocean_quiz_dauphin',
     correct: 'Le dauphin',
     wrong:   ['Le requin', 'La baleine', 'Le poisson'],
+  },
+  {
+    imageEmoji: '🐢',
+    question:  "Quels animaux ont besoin d'air dans l'océan ?",
+    correct:   'La tortue',
+    wrong:     ['Le requin', 'Le poisson', 'La pieuvre'],
   },
 ];
 
@@ -93,7 +99,7 @@ export class OceanScene extends Phaser.Scene {
     [[180,H-80],[310,H-170],[570,H-260],[670,H-260],[830,H-190],[890,H-190],
      [1080,H-290],[1160,H-120],[1330,H-200],[1580,H-170]]
       .slice(0, NUM_COLLECTIBLES).forEach(([cx, cy]) => {
-        const c = this.add.text(cx, cy, '🫧', { fontSize: '26px' }).setOrigin(0.5);
+        const c = this.add.text(cx, cy, '🌿', { fontSize: '26px' }).setOrigin(0.5);
         this.physics.add.existing(c, true);
         this._coins.add(c);
       });
@@ -110,12 +116,15 @@ export class OceanScene extends Phaser.Scene {
     this.physics.add.collider(this._player.sprite, platforms);
     this.cameras.main.startFollow(this._player.sprite, true, 0.1, 0.1);
 
-    // ── Obstacles (méduses — réduisent les points de vie au contact) ──────────
-    // TODO: Remplacez les emplacements et l'emoji par ceux de votre niveau
+    // ── Obstacles : requins qui patrouillent ────────────────────────────────────
     this._obstacles = this.physics.add.staticGroup();
-    this._obstacle(this._obstacles, 450,  H - 60, '🪼');
-    this._obstacle(this._obstacles, 950,  H - 60, '🪼');
-    this._obstacle(this._obstacles, 1400, H - 60, '🪼');
+    this._sharkObstacle(this._obstacles, 450,  H - 70,  45);
+    this._sharkObstacle(this._obstacles, 900,  H - 160, 35);
+    this._sharkObstacle(this._obstacles, 1450, H - 70,  50);
+
+    // ── Grand tourbillon — mort instantanée au contact ──────────────────────────
+    this._tourbillonGroup = this.physics.add.staticGroup();
+    this._tourbillonObstacle(this._tourbillonGroup, 1220, H - 80);
 
     this.physics.add.overlap(this._player.sprite, this._coins, (_, c) => this._ramasserCoin(c));
     this.physics.add.overlap(this._player.sprite, this._goal,  () => { if (!this._done) this._gagner(); });
@@ -124,6 +133,11 @@ export class OceanScene extends Phaser.Scene {
       this._damageCooldown = true;
       this.time.delayedCall(1000, () => { this._damageCooldown = false; });
       if (this._player.takeDamage()) { this._done = true; this.time.delayedCall(500, () => this._perdre()); }
+    });
+    this.physics.add.overlap(this._player.sprite, this._tourbillonGroup, () => {
+      if (this._done) return;
+      this._done = true;
+      this.time.delayedCall(300, () => this._perdre());
     });
 
     // HUD
@@ -175,12 +189,28 @@ export class OceanScene extends Phaser.Scene {
     this._viesText.setText(v);
   }
 
-  _obstacle(group, x, y, emoji) {
-    const rect = this.add.rectangle(x, y, 32, 36, 0xff2200);
+  // Requin qui se déplace de ±range pixels autour de sa position initiale
+  _sharkObstacle(group, x, y, range) {
+    const rect  = this.add.rectangle(x, y, 44, 28, 0xff2200).setAlpha(0.01);
     this.physics.add.existing(rect, true);
     group.add(rect);
-    this.add.text(x, y + 2, emoji, { fontSize: '26px' }).setOrigin(0.5);
-    return rect;
+    const emoji = this.add.text(x, y, '🦈', { fontSize: '32px' }).setOrigin(0.5);
+    this.tweens.add({
+      targets: [rect, emoji],
+      x: { from: x - range, to: x + range },
+      duration: 1800 + Math.floor(range * 20),
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      onUpdate: () => rect.body.reset(rect.x, rect.y),
+    });
+  }
+
+  // Tourbillon géant — mort instantanée
+  _tourbillonObstacle(group, x, y) {
+    const rect = this.add.rectangle(x, y, 72, 72, 0x6600aa).setAlpha(0.01);
+    this.physics.add.existing(rect, true);
+    group.add(rect);
+    const emoji = this.add.text(x, y, '🌪️', { fontSize: '60px' }).setOrigin(0.5);
+    this.tweens.add({ targets: emoji, scaleX: 1.15, scaleY: 1.15, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   _plateforme(group, x, y, width) {
