@@ -1,11 +1,11 @@
-// level04-chateau/index.js — Le Château Hanté
+// level04-chateau/index.js — La Maison Hantée
 import { ChateauScene } from './LevelScene.js';
 
 export default {
   meta: {
     id: 'level04-chateau',
-    titleFR: 'Le Château Hanté',
-    descriptionFR: 'Continue l\'aventure !',
+    titleFR: 'La Maison Hantée',
+    descriptionFR: 'Ose entrer si tu l\'oses !',
     thumbnailKey: 'chateau_thumb',
     order: 4,
     unlockAfterLevel: null,
