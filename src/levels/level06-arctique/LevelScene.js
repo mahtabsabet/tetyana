@@ -108,6 +108,14 @@ export class ArctiqueScene extends Phaser.Scene {
     this._animalObstacle(this._obstacles, 1250, H - 60, '🐻‍❄️', 55);
     this._animalObstacle(this._obstacles, 1600, H - 60, '🦊',   45);
 
+    // ── Boss de fin : troll caché derrière des arbres ────────────────────────
+    // Trees in foreground (depth 6) — troll lurks behind them (depth 2)
+    const trollX = 1730;
+    const trollY = H - 68;
+    this.add.text(trollX - 52, H - 72, '🌲', { fontSize: '72px' }).setOrigin(0.5).setDepth(6);
+    this.add.text(trollX + 52, H - 72, '🌲', { fontSize: '72px' }).setOrigin(0.5).setDepth(6);
+    this._trollObstacle(this._obstacles, trollX, trollY, 48);
+
     this.physics.add.overlap(this._player.sprite, this._coins, (_, c) => this._ramasserCoin(c));
     this.physics.add.overlap(this._player.sprite, this._goal,  () => { if (!this._done) this._gagner(); });
     this.physics.add.overlap(this._player.sprite, this._obstacles, () => {
@@ -142,6 +150,21 @@ export class ArctiqueScene extends Phaser.Scene {
     }
     this._scoreText.setText(`⭐ ${this._score}`);
     this._viesText.setText('❤️'.repeat(this._player.lives) + '🖤'.repeat(Math.max(0, 3 - this._player.lives)));
+  }
+
+  // Boss troll — paces behind the trees at depth 2
+  _trollObstacle(group, x, y, range) {
+    const rect = this.add.rectangle(x, y, 48, 52, 0xff2200).setAlpha(0.01).setDepth(2);
+    this.physics.add.existing(rect, true);
+    group.add(rect);
+    const label = this.add.text(x, y, '🧌', { fontSize: '48px' }).setOrigin(0.5).setDepth(2);
+    this.tweens.add({
+      targets: [rect, label],
+      x: { from: x - range, to: x + range },
+      duration: 2200,
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      onUpdate: () => rect.body.reset(rect.x, rect.y),
+    });
   }
 
   // Animal obstacle that paces back and forth
